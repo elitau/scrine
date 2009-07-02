@@ -17,7 +17,7 @@
 
 class IssuesController < ApplicationController
   menu_item :new_issue, :only => :new
-  
+  # before_filter :load_roles # scrine stuff
   before_filter :find_issue, :only => [:show, :edit, :reply]
   before_filter :find_issues, :only => [:bulk_edit, :move, :destroy]
   before_filter :find_project, :only => [:new, :update_form, :preview]
@@ -42,6 +42,7 @@ class IssuesController < ApplicationController
   include IssuesHelper
   helper :timelog
   include Redmine::Export::PDF
+
 
   def index
     retrieve_query

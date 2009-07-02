@@ -28,7 +28,7 @@ Rails::Initializer.run do |config|
 
   # Force all environments to use the same logger level 
   # (by default production uses :info, the others :debug)
-  # config.log_level = :debug
+  # config.log_level = :debug/
 
   # Enable page/fragment caching by setting a file-based store
   # (remember to create the caching directory and make it readable to the application)
@@ -44,6 +44,7 @@ Rails::Initializer.run do |config|
   # Use Active Record's schema dumper instead of SQL when creating the test database
   # (enables use of different database adapters for development and test environments)
   # config.active_record.schema_format = :ruby
+  config.action_controller.session = { :session_key => "_myapp_session", :secret => "1fd39b082517f30b2ac6c41e82b05a03a46617d9a6bd80fe08f651af35dc138e50b618e4eefd7543eaf4683dba48490fbdb6ce163a35c8dbc2bc79a959e3bbe3" }
   
   # Deliveries are disabled by default. Do NOT modify this section.
   # Define your email configuration in email.yml instead.
