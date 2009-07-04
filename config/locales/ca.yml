@@ -748,7 +748,7 @@ ca:
   text_file_repository_writable: Es pot escriure en el dipòsit de fitxers
   text_plugin_assets_writable: Es pot escriure als connectors actius
   text_rmagick_available: RMagick disponible (opcional)
-  text_destroy_time_entries_question: "S'han informat %.02f hores en els assumptes que aneu a suprimir. Què voleu fer?"
+  text_destroy_time_entries_question: "S'han informat {{hours}} hores en els assumptes que aneu a suprimir. Què voleu fer?"
   text_destroy_time_entries: Suprimeix les hores informades
   text_assign_time_entries_to_project: Assigna les hores informades al projecte
   text_reassign_time_entries: 'Torna a assignar les hores informades a aquest assumpte:'
@@ -787,3 +787,9 @@ ca:
   enumeration_activities: Activitats (seguidor de temps)
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

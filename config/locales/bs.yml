@@ -770,7 +770,7 @@ bs:
   text_file_repository_writable: U direktorij sa fajlovima koji su prilozi se može pisati
   text_plugin_assets_writable: U direktorij plugin-ova se može pisati
   text_rmagick_available: RMagick je dostupan (opciono)
-  text_destroy_time_entries_question: %.02f sahata je prijavljeno na aktivnostima koje želite brisati. Želite li to učiniti ?
+  text_destroy_time_entries_question: "{{hours}} sahata je prijavljeno na aktivnostima koje želite brisati. Želite li to učiniti ?"
   text_destroy_time_entries: Izbriši prijavljeno vrijeme
   text_assign_time_entries_to_project: Dodaj prijavljenoo vrijeme projektu
   text_reassign_time_entries: 'Preraspodjeli prijavljeno vrijeme na ovu aktivnost:'
@@ -817,3 +817,9 @@ bs:
   label_descending: Opadajuće
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

@@ -704,7 +704,7 @@ fi:
   label_downloads_abbr: D/L
   label_add_another_file: Lisää uusi tiedosto
   label_this_month: tässä kuussa
-  text_destroy_time_entries_question: %.02f tuntia on raportoitu tapahtumasta jonka aiot poistaa. Mitä haluat tehdä ?
+  text_destroy_time_entries_question: "{{hours}} tuntia on raportoitu tapahtumasta jonka aiot poistaa. Mitä haluat tehdä ?"
   label_last_n_days: "viimeiset {{count}} päivää"
   label_all_time: koko ajalta
   error_issue_not_found_in_project: 'Tapahtumaa ei löytynyt tai se ei kuulu tähän projektiin'
@@ -827,3 +827,9 @@ fi:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

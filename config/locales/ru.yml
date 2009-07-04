@@ -871,7 +871,7 @@ ru:
   text_comma_separated: Допустимы несколько значений (через запятую).
   text_custom_field_possible_values_info: 'По одному значению в каждой строке'
   text_default_administrator_account_changed: Учетная запись администратора по умолчанию изменена
-  text_destroy_time_entries_question: Вы собираетесь удалить %.02f часа(ов) прикрепленных за этой задачей.
+  text_destroy_time_entries_question: Вы собираетесь удалить {{hours}} часа(ов) прикрепленных за этой задачей.
   text_destroy_time_entries: Удалить зарегистрированное время
   text_diff_truncated: '... Этот diff ограничен, так как превышает максимальный отображаемый размер.'
   text_email_delivery_not_configured: "Параметры работы с почтовым сервером не настроены и функция уведомления по email не активна.\nНастроить параметры для Вашего SMTP-сервера Вы можете в файле config/email.yml. Для применения изменений перезапустите приложение."
@@ -914,3 +914,9 @@ ru:
   text_workflow_edit: Выберите роль и трекер для редактирования последовательности состояний
 
   warning_attachments_not_saved: "{{count}} файл(ов) невозможно сохранить."
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

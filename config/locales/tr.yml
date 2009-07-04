@@ -696,7 +696,7 @@ tr:
   text_default_administrator_account_changed: Varsayılan yönetici hesabı değişti
   text_file_repository_writable: Dosya deposu yazılabilir
   text_rmagick_available: RMagick Kullanılabilir (isteğe bağlı)
-  text_destroy_time_entries_question: Silmek üzere olduğunuz iletiler üzerine %.02f saat raporlandı.Ne yapmak istersiniz ?
+  text_destroy_time_entries_question: Silmek üzere olduğunuz iletiler üzerine {{hours}} saat raporlandı.Ne yapmak istersiniz ?
   text_destroy_time_entries: Raporlanmış saatleri sil
   text_assign_time_entries_to_project: Raporlanmış saatleri projeye ata
   text_reassign_time_entries: 'Raporlanmış saatleri bu iletiye tekrar ata:'
@@ -823,3 +823,9 @@ tr:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

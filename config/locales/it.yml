@@ -690,7 +690,7 @@ it:
   label_last_month: ultimo mese
   label_add_another_file: Aggiungi un altro file
   label_optional_description: Descrizione opzionale
-  text_destroy_time_entries_question: %.02f ore risultano spese sulle segnalazioni che stai per cancellare. Cosa vuoi fare ?
+  text_destroy_time_entries_question: "{{hours}} ore risultano spese sulle segnalazioni che stai per cancellare. Cosa vuoi fare ?"
   error_issue_not_found_in_project: 'La segnalazione non è stata trovata o non appartiene al progetto'
   text_assign_time_entries_to_project: Assegna le ore segnalate al progetto
   text_destroy_time_entries: Elimina le ore segnalate
@@ -802,3 +802,9 @@ it:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

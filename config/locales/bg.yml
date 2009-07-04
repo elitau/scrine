@@ -672,7 +672,7 @@ bg:
   label_last_month: последния месец
   label_add_another_file: Добавяне на друг файл
   label_optional_description: Незадължително описание
-  text_destroy_time_entries_question: %.02f часа са отделени на задачите, които искате да изтриете. Какво избирате?
+  text_destroy_time_entries_question: "{{hours}} часа са отделени на задачите, които искате да изтриете. Какво избирате?"
   error_issue_not_found_in_project: 'Задачата не е намерена или не принадлежи на този проект'
   text_assign_time_entries_to_project: Прехвърляне на отделеното време към проект
   text_destroy_time_entries: Изтриване на отделеното време
@@ -784,3 +784,9 @@ bg:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

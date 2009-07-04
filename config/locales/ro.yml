@@ -748,7 +748,7 @@ ro:
   text_file_repository_writable: Se poate scrie in directorul de atasamente
   text_plugin_assets_writable: Se poate scrie in directorul de plugins
   text_rmagick_available: Este disponibil RMagick (optional)
-  text_destroy_time_entries_question: %.02f ore sunt inregistrate la tichetele pe care doriti sa le stergeti. Ce doriti sa faceti?
+  text_destroy_time_entries_question: "{{hours}} ore sunt inregistrate la tichetele pe care doriti sa le stergeti. Ce doriti sa faceti?"
   text_destroy_time_entries: Sterge orele inregistrate
   text_assign_time_entries_to_project: Atribuie orele la proiect
   text_reassign_time_entries: 'Atribuie orele inregistrate la tichetul:'
@@ -787,3 +787,9 @@ ro:
   enumeration_activities: Activitati (timp de lucru)
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

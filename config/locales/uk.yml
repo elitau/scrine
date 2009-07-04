@@ -674,7 +674,7 @@ uk:
   label_last_month: last month
   label_add_another_file: Add another file
   label_optional_description: Optional description
-  text_destroy_time_entries_question: %.02f hours were reported on the issues you are about to delete. What do you want to do ?
+  text_destroy_time_entries_question: "{{hours}} hours were reported on the issues you are about to delete. What do you want to do ?"
   error_issue_not_found_in_project: 'The issue was not found or does not belong to this project'
   text_assign_time_entries_to_project: Assign reported hours to the project
   text_destroy_time_entries: Delete reported hours
@@ -786,3 +786,9 @@ uk:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

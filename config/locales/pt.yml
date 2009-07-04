@@ -699,7 +699,7 @@ pt:
   text_default_administrator_account_changed: Conta default de administrador alterada.
   text_file_repository_writable: Repositório de ficheiros com permissões de escrita
   text_rmagick_available: RMagick disponível (opcional)
-  text_destroy_time_entries_question: %.02f horas de trabalho foram atribuídas a estas tarefas que vai apagar. O que deseja fazer?
+  text_destroy_time_entries_question: "{{hours}} horas de trabalho foram atribuídas a estas tarefas que vai apagar. O que deseja fazer?"
   text_destroy_time_entries: Apagar as horas
   text_assign_time_entries_to_project: Atribuir as horas ao projecto
   text_reassign_time_entries: 'Re-atribuir as horas para esta tarefa:'
@@ -808,3 +808,9 @@ pt:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

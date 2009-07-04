@@ -242,6 +242,7 @@ en:
   field_watcher: Watcher
   field_identity_url: OpenID URL
   field_content: Content
+  field_group_by: Group results by
   
   setting_app_title: Application title
   setting_app_subtitle: Application subtitle
@@ -285,6 +286,7 @@ en:
   setting_file_max_size_displayed: Max size of text files displayed inline
   setting_repository_log_display_limit: Maximum number of revisions displayed on file log
   setting_openid: Allow OpenID login and registration
+  setting_password_min_length: Minimum password length
   
   permission_edit_project: Edit project
   permission_select_project_modules: Select project modules
@@ -750,7 +752,7 @@ en:
   text_file_repository_writable: Attachments directory writable
   text_plugin_assets_writable: Plugin assets directory writable
   text_rmagick_available: RMagick available (optional)
-  text_destroy_time_entries_question: %.02f hours were reported on the issues you are about to delete. What do you want to do ?
+  text_destroy_time_entries_question: "{{hours}} hours were reported on the issues you are about to delete. What do you want to do ?"
   text_destroy_time_entries: Delete reported hours
   text_assign_time_entries_to_project: Assign reported hours to the project
   text_reassign_time_entries: 'Reassign reported hours to this issue:'
@@ -761,6 +763,10 @@ en:
   text_repository_usernames_mapping: "Select or update the Redmine user mapped to each username found in the repository log.\nUsers with the same Redmine and repository username or email are automatically mapped."
   text_diff_truncated: '... This diff was truncated because it exceeds the maximum size that can be displayed.'
   text_custom_field_possible_values_info: 'One line for each value'
+  text_wiki_page_destroy_question: "This page has {{descendants}} child page(s) and descendant(s). What do you want to do?"
+  text_wiki_page_nullify_children: "Keep child pages as root pages"
+  text_wiki_page_destroy_children: "Delete child pages and all their descendants"
+  text_wiki_page_reassign_children: "Reassign child pages to this parent page"
   
   default_role_manager: Manager
   default_role_developper: Developer

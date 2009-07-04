@@ -668,7 +668,7 @@
   text_default_administrator_account_changed: Standard administrator-konto er endret
   text_file_repository_writable: Fil-arkivet er skrivbart
   text_rmagick_available: RMagick er tilgjengelig (valgfritt)
-  text_destroy_time_entries_question: %.02f timer er ført på sakene du er i ferd med å slette. Hva vil du gjøre ?
+  text_destroy_time_entries_question: "{{hours}} timer er ført på sakene du er i ferd med å slette. Hva vil du gjøre ?"
   text_destroy_time_entries: Slett førte timer
   text_assign_time_entries_to_project: Overfør førte timer til prosjektet
   text_reassign_time_entries: 'Overfør førte timer til denne saken:'
@@ -789,3 +789,9 @@
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

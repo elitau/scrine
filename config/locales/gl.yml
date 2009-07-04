@@ -758,7 +758,7 @@ gl:
   text_comma_separated: Múltiples valores permitidos (separados por coma).
   text_default_administrator_account_changed: Conta de administrador por defecto modificada
   text_destroy_time_entries: Borrar as horas
-  text_destroy_time_entries_question: Existen %.02f horas asignadas á petición que quere borrar. ¿Que quere facer ?
+  text_destroy_time_entries_question: Existen {{hours}} horas asignadas á petición que quere borrar. ¿Que quere facer ?
   text_diff_truncated: '... Diferencia truncada por exceder o máximo tamaño visualizable.'
   text_email_delivery_not_configured: "O envío de correos non está configurado, e as notificacións desactiváronse. \n Configure o servidor de SMTP en config/email.yml e reinicie a aplicación para activar os cambios."
   text_enumeration_category_reassign_to: 'Reasignar ó seguinte valor:'
@@ -816,3 +816,9 @@ gl:
   label_date_from_to: From {{start}} to {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by

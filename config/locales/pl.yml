@@ -758,7 +758,7 @@ pl:
   text_comma_separated: Wielokrotne wartości dozwolone (rozdzielone przecinkami).
   text_default_administrator_account_changed: Zmieniono domyślne hasło administratora
   text_destroy_time_entries: Usuń zalogowany czas
-  text_destroy_time_entries_question: Zalogowano %.02f godzin przy zagadnieniu, które chcesz usunąć. Co chcesz zrobić?
+  text_destroy_time_entries_question: Zalogowano {{hours}} godzin przy zagadnieniu, które chcesz usunąć. Co chcesz zrobić?
   text_email_delivery_not_configured: "Dostarczanie poczty elektronicznej nie zostało skonfigurowane, więc powiadamianie jest nieaktywne.\nSkonfiguruj serwer SMTP w config/email.yml  a następnie zrestartuj aplikację i uaktywnij to."
   text_enumeration_category_reassign_to: 'Zmień przypisanie na tą wartość:'
   text_enumeration_destroy_question: "{{count}} obiektów jest przypisana do tej wartości."
@@ -820,3 +820,9 @@ pl:
   label_date_from_to: Od {{start}} do {{end}}
   label_greater_or_equal: ">="
   label_less_or_equal: <=
+  text_wiki_page_destroy_question: This page has {{descendants}} child page(s) and descendant(s). What do you want to do?
+  text_wiki_page_reassign_children: Reassign child pages to this parent page
+  text_wiki_page_nullify_children: Keep child pages as root pages
+  text_wiki_page_destroy_children: Delete child pages and all their descendants
+  setting_password_min_length: Minimum password length
+  field_group_by: Group results by
