@@ -22,7 +22,7 @@ class Issue < ActiveRecord::Base
   belongs_to :author, :class_name => 'User', :foreign_key => 'author_id'
   belongs_to :assigned_to, :class_name => 'User', :foreign_key => 'assigned_to_id'
   belongs_to :fixed_version, :class_name => 'Version', :foreign_key => 'fixed_version_id'
-  belongs_to :priority, :class_name => 'Enumeration', :foreign_key => 'priority_id'
+  belongs_to :priority, :class_name => 'IssuePriority', :foreign_key => 'priority_id'
   belongs_to :category, :class_name => 'IssueCategory', :foreign_key => 'category_id'
 
   has_many :journals, :as => :journalized, :dependent => :destroy
@@ -67,7 +67,7 @@ class Issue < ActiveRecord::Base
     if new_record?
       # set default values for new records only
       self.status ||= IssueStatus.default
-      self.priority ||= Enumeration.priorities.default
+      self.priority ||= IssuePriority.default
     end
   end
   
@@ -203,11 +203,17 @@ class Issue < ActiveRecord::Base
     project.assignable_users
   end
   
+  # Returns true if this issue is blocked by another issue that is still open
+  def blocked?
+    !relations_to.detect {|ir| ir.relation_type == 'blocks' && !ir.issue_from.closed?}.nil?
+  end
+  
   # Returns an array of status that user is able to apply
   def new_statuses_allowed_to(user)
-    statuses = status.find_new_statuses_allowed_to(user.role_for_project(project), tracker)
+    statuses = status.find_new_statuses_allowed_to(user.roles_for_project(project), tracker)
     statuses << status unless statuses.empty?
-    statuses.uniq.sort
+    statuses = statuses.uniq.sort
+    blocked? ? statuses.reject {|s| s.is_closed?} : statuses
   end
   
   # Returns the mail adresses of users that should be notified for the issue

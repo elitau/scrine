@@ -14,7 +14,9 @@
         <h3><%=h @issue.subject %></h3>
         <p class="author">
         <%= authoring @issue.created_on, @issue.author %>.
-        <%= l(:label_updated_time, distance_of_time_in_words(Time.now, @issue.updated_on)) + '.' if @issue.created_on != @issue.updated_on %>
+        <% if @issue.created_on != @issue.updated_on %>
+        <%= l(:label_updated_time, time_tag(@issue.updated_on)) %>.
+        <% end %>
         </p>
 
 <table width="100%">
@@ -45,7 +47,7 @@
 </tr>
 <tr>
 <% n = 0 -%>
-<% @issue.custom_values.each do |value| -%>
+<% @issue.custom_field_values.each do |value| -%>
     <td valign="top"><b><%=h value.custom_field.name %>:</b></td><td valign="top"><%= simple_format(h(show_value(value))) %></td>
 <% n = n + 1
    if (n > 1) 

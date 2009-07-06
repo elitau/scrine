@@ -20,7 +20,8 @@ require File.dirname(__FILE__) + '/../test_helper'
 class ProjectTest < Test::Unit::TestCase
   fixtures :projects, :enabled_modules, 
            :issues, :issue_statuses, :journals, :journal_details,
-           :users, :members, :roles, :projects_trackers, :trackers, :boards
+           :users, :members, :member_roles, :roles, :projects_trackers, :trackers, :boards,
+           :queries
 
   def setup
     @ecookbook = Project.find(1)
@@ -45,6 +46,20 @@ class ProjectTest < Test::Unit::TestCase
     assert !@ecookbook.save
     assert_equal 1, @ecookbook.errors.count
     assert_equal I18n.translate('activerecord.errors.messages.blank'), @ecookbook.errors.on(:name)
+  end
+  
+  def test_validate_identifier
+    to_test = {"abc" => true,
+               "ab12" => true,
+               "ab-12" => true,
+               "12" => false}
+               
+    to_test.each do |identifier, valid|
+      p = Project.new
+      p.identifier = identifier
+      p.valid?
+      assert_equal valid, p.errors.on('identifier').nil?
+    end
   end
   
   def test_archive
@@ -185,6 +200,14 @@ class ProjectTest < Test::Unit::TestCase
     assert_equal [5, 6, 3, 4], d.collect(&:id)
   end
   
+  def test_users_by_role
+    users_by_role = Project.find(1).users_by_role
+    assert_kind_of Hash, users_by_role
+    role = Role.find(1)
+    assert_kind_of Array, users_by_role[role]
+    assert users_by_role[role].include?(User.find(2))
+  end
+  
   def test_rolled_up_trackers
     parent = Project.find(1)
     parent.trackers = Tracker.find([1,2])
@@ -221,6 +244,7 @@ class ProjectTest < Test::Unit::TestCase
     assert_nil Project.next_identifier
   end
   
+
   def test_enabled_module_names_should_not_recreate_enabled_modules
     project = Project.find(1)
     # Remove one module
@@ -233,4 +257,86 @@ class ProjectTest < Test::Unit::TestCase
     # Ids should be preserved
     assert_equal project.enabled_module_ids.sort, modules.collect(&:id).sort
   end
+
+  def test_copy_from_existing_project
+    source_project = Project.find(1)
+    copied_project = Project.copy_from(1)
+
+    assert copied_project
+    # Cleared attributes
+    assert copied_project.id.blank?
+    assert copied_project.name.blank?
+    assert copied_project.identifier.blank?
+    
+    # Duplicated attributes
+    assert_equal source_project.description, copied_project.description
+    assert_equal source_project.enabled_modules, copied_project.enabled_modules
+    assert_equal source_project.trackers, copied_project.trackers
+
+    # Default attributes
+    assert_equal 1, copied_project.status
+  end
+  
+  # Context: Project#copy
+  def test_copy_should_copy_issues
+    # Setup
+    ProjectCustomField.destroy_all # Custom values are a mess to isolate in tests
+    source_project = Project.find(2)
+    Project.destroy_all :identifier => "copy-test"
+    project = Project.new(:name => 'Copy Test', :identifier => 'copy-test')
+    project.trackers = source_project.trackers
+    assert project.valid?
+    
+    assert project.issues.empty?
+    assert project.copy(source_project)
+
+    # Tests
+    assert_equal source_project.issues.size, project.issues.size
+    project.issues.each do |issue|
+      assert issue.valid?
+      assert ! issue.assigned_to.blank?
+      assert_equal project, issue.project
+    end
+  end
+  
+  def test_copy_should_copy_members
+    # Setup
+    ProjectCustomField.destroy_all # Custom values are a mess to isolate in tests
+    source_project = Project.find(2)
+    project = Project.new(:name => 'Copy Test', :identifier => 'copy-test')
+    project.trackers = source_project.trackers
+    project.enabled_modules = source_project.enabled_modules
+    assert project.valid?
+
+    assert project.members.empty?
+    assert project.copy(source_project)
+
+    # Tests
+    assert_equal source_project.members.size, project.members.size
+    project.members.each do |member|
+      assert member
+      assert_equal project, member.project
+    end
+  end
+
+  def test_copy_should_copy_project_level_queries
+    # Setup
+    ProjectCustomField.destroy_all # Custom values are a mess to isolate in tests
+    source_project = Project.find(2)
+    project = Project.new(:name => 'Copy Test', :identifier => 'copy-test')
+    project.trackers = source_project.trackers
+    project.enabled_modules = source_project.enabled_modules
+    assert project.valid?
+
+    assert project.queries.empty?
+    assert project.copy(source_project)
+
+    # Tests
+    assert_equal source_project.queries.size, project.queries.size
+    project.queries.each do |query|
+      assert query
+      assert_equal project, query.project
+    end
+  end
+
 end

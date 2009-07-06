@@ -24,7 +24,7 @@ class UsersController; def rescue_action(e) raise e end; end
 class UsersControllerTest < Test::Unit::TestCase
   include Redmine::I18n
   
-  fixtures :users, :projects, :members
+  fixtures :users, :projects, :members, :member_roles, :roles
   
   def setup
     @controller = UsersController.new
@@ -107,25 +107,11 @@ class UsersControllerTest < Test::Unit::TestCase
     )
   end
   
-  def test_add_membership_routing
-    assert_routing(
-      {:method => :post, :path => '/users/123/memberships'},
-      :controller => 'users', :action => 'edit_membership', :id => '123'
-    )
-  end
-  
-  def test_edit_membership_routing
-    assert_routing(
-      {:method => :post, :path => '/users/123/memberships/55'},
-      :controller => 'users', :action => 'edit_membership', :id => '123', :membership_id => '55'
-    )
-  end
-  
-  def test_edit_membership
-    post :edit_membership, :id => 2, :membership_id => 1,
-                           :membership => { :role_id => 2}
-    assert_redirected_to :action => 'edit', :id => '2', :tab => 'memberships'
-    assert_equal 2, Member.find(1).role_id
+  def test_edit
+    ActionMailer::Base.deliveries.clear
+    post :edit, :id => 2, :user => {:firstname => 'Changed'}
+    assert_equal 'Changed', User.find(2).firstname
+    assert ActionMailer::Base.deliveries.empty?
   end
   
   def test_edit_with_activation_should_send_a_notification
@@ -142,6 +128,41 @@ class UsersControllerTest < Test::Unit::TestCase
     assert_not_nil mail
     assert_equal ['foo.bar@somenet.foo'], mail.bcc
     assert mail.body.include?(ll('fr', :notice_account_activated))
+  end
+  
+  def test_edit_with_password_change_should_send_a_notification
+    ActionMailer::Base.deliveries.clear
+    Setting.bcc_recipients = '1'
+    
+    u = User.find(2)
+    post :edit, :id => u.id, :user => {}, :password => 'newpass', :password_confirmation => 'newpass', :send_information => '1'
+    assert_equal User.hash_password('newpass'), u.reload.hashed_password 
+    
+    mail = ActionMailer::Base.deliveries.last
+    assert_not_nil mail
+    assert_equal [u.mail], mail.bcc
+    assert mail.body.include?('newpass')
+  end
+  
+  def test_add_membership_routing
+    assert_routing(
+      {:method => :post, :path => '/users/123/memberships'},
+      :controller => 'users', :action => 'edit_membership', :id => '123'
+    )
+  end
+  
+  def test_edit_membership_routing
+    assert_routing(
+      {:method => :post, :path => '/users/123/memberships/55'},
+      :controller => 'users', :action => 'edit_membership', :id => '123', :membership_id => '55'
+    )
+  end
+  
+  def test_edit_membership
+    post :edit_membership, :id => 2, :membership_id => 1,
+                           :membership => { :role_ids => [2]}
+    assert_redirected_to :action => 'edit', :id => '2', :tab => 'memberships'
+    assert_equal [2], Member.find(1).role_ids
   end
   
   def test_destroy_membership

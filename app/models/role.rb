@@ -20,6 +20,7 @@ class Role < ActiveRecord::Base
   BUILTIN_NON_MEMBER = 1
   BUILTIN_ANONYMOUS  = 2
 
+  named_scope :givable, { :conditions => "builtin = 0", :order => 'position' }
   named_scope :builtin, lambda { |*args|
     compare = 'not' if args.first == true
     { :conditions => "#{compare} builtin = 0" }
@@ -38,7 +39,8 @@ class Role < ActiveRecord::Base
     end
   end
   
-  has_many :members
+  has_many :member_roles, :dependent => :destroy
+  has_many :members, :through => :member_roles
   acts_as_list
   
   serialize :permissions, Array
@@ -82,7 +84,11 @@ class Role < ActiveRecord::Base
   end
   
   def <=>(role)
-    position <=> role.position
+    role ? position <=> role.position : -1
+  end
+  
+  def to_s
+    name
   end
   
   # Return true if the role is a builtin role

@@ -22,7 +22,7 @@ require 'projects_controller'
 class ProjectsController; def rescue_action(e) raise e end; end
 
 class ProjectsControllerTest < Test::Unit::TestCase
-  fixtures :projects, :versions, :users, :roles, :members, :issues, :journals, :journal_details,
+  fixtures :projects, :versions, :users, :roles, :members, :member_roles, :issues, :journals, :journal_details,
            :trackers, :projects_trackers, :issue_statuses, :enabled_modules, :enumerations, :boards, :messages,
            :attachments
 
@@ -87,6 +87,56 @@ class ProjectsControllerTest < Test::Unit::TestCase
       {:controller => 'projects', :action => 'add'},
       {:method => :post, :path => '/projects'}
     )
+  end
+  
+  def test_get_add
+    @request.session[:user_id] = 1
+    get :add
+    assert_response :success
+    assert_template 'add'
+  end
+  
+  def test_get_add_by_non_admin
+    @request.session[:user_id] = 2
+    get :add
+    assert_response :success
+    assert_template 'add'
+  end
+  
+  def test_post_add
+    @request.session[:user_id] = 1
+    post :add, :project => { :name => "blog", 
+                             :description => "weblog",
+                             :identifier => "blog",
+                             :is_public => 1,
+                             :custom_field_values => { '3' => 'Beta' }
+                            }
+    assert_redirected_to '/projects/blog/settings'
+    
+    project = Project.find_by_name('blog')
+    assert_kind_of Project, project
+    assert_equal 'weblog', project.description 
+    assert_equal true, project.is_public?
+  end
+  
+  def test_post_add_by_non_admin
+    @request.session[:user_id] = 2
+    post :add, :project => { :name => "blog", 
+                             :description => "weblog",
+                             :identifier => "blog",
+                             :is_public => 1,
+                             :custom_field_values => { '3' => 'Beta' }
+                            }
+    assert_redirected_to '/projects/blog/settings'
+    
+    project = Project.find_by_name('blog')
+    assert_kind_of Project, project
+    assert_equal 'weblog', project.description 
+    assert_equal true, project.is_public?
+    
+    # User should be added as a project member
+    assert User.find(2).member_of?(project)
+    assert_equal 1, project.members.size
   end
   
   def test_show_routing
@@ -453,7 +503,6 @@ class ProjectsControllerTest < Test::Unit::TestCase
     6.times do |i|
       p = Project.create!(:name => "Breadcrumbs #{i}", :identifier => "breadcrumbs-#{i}")
       p.set_parent!(parent)
-      
       get :show, :id => p
       assert_tag :h1, :parent => { :attributes => {:id => 'header'}},
                       :children => { :count => [i, 3].min,
@@ -462,7 +511,24 @@ class ProjectsControllerTest < Test::Unit::TestCase
       parent = p
     end
   end
-  
+
+  def test_copy_with_project
+    @request.session[:user_id] = 1 # admin
+    get :copy, :id => 1
+    assert_response :success
+    assert_template 'copy'
+    assert assigns(:project)
+    assert_equal Project.find(1).description, assigns(:project).description
+    assert_nil assigns(:project).id
+  end
+
+  def test_copy_without_project
+    @request.session[:user_id] = 1 # admin
+    get :copy
+    assert_response :redirect
+    assert_redirected_to :controller => 'admin', :action => 'projects'
+  end
+
   def test_jump_should_redirect_to_active_tab
     get :show, :id => 1, :jump => 'issues'
     assert_redirected_to 'projects/ecookbook/issues'

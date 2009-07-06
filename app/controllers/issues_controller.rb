@@ -23,7 +23,7 @@ class IssuesController < ApplicationController
   before_filter :find_project, :only => [:new, :update_form, :preview]
   before_filter :authorize, :except => [:index, :changes, :gantt, :calendar, :preview, :update_form, :context_menu]
   before_filter :find_optional_project, :only => [:index, :changes, :gantt, :calendar]
-  accept_key_auth :index, :changes
+  accept_key_auth :index, :show, :changes
 
   helper :journals
   helper :projects
@@ -114,7 +114,7 @@ class IssuesController < ApplicationController
     @changesets.reverse! if User.current.wants_comments_in_reverse_order?
     @allowed_statuses = @issue.new_statuses_allowed_to(User.current)
     @edit_allowed = User.current.allowed_to?(:edit_issues, @project)
-    @priorities = Enumeration.priorities
+    @priorities = IssuePriority.all
     @time_entry = TimeEntry.new
     respond_to do |format|
       format.html { render :template => 'issues/show.rhtml' }
@@ -147,7 +147,7 @@ class IssuesController < ApplicationController
       return
     end    
     @issue.status = default_status
-    @allowed_statuses = ([default_status] + default_status.find_new_statuses_allowed_to(User.current.role_for_project(@project), @issue.tracker)).uniq
+    @allowed_statuses = ([default_status] + default_status.find_new_statuses_allowed_to(User.current.roles_for_project(@project), @issue.tracker)).uniq
     
     if request.get? || request.xhr?
       @issue.start_date ||= Date.today
@@ -164,7 +164,7 @@ class IssuesController < ApplicationController
         return
       end		
     end	
-    @priorities = Enumeration.priorities
+    @priorities = IssuePriority.all
     render :layout => !request.xhr?
   end
   
@@ -174,7 +174,7 @@ class IssuesController < ApplicationController
   
   def edit
     @allowed_statuses = @issue.new_statuses_allowed_to(User.current)
-    @priorities = Enumeration.priorities
+    @priorities = IssuePriority.all
     @edit_allowed = User.current.allowed_to?(:edit_issues, @project)
     @time_entry = TimeEntry.new
     
@@ -238,7 +238,7 @@ class IssuesController < ApplicationController
   def bulk_edit
     if request.post?
       status = params[:status_id].blank? ? nil : IssueStatus.find_by_id(params[:status_id])
-      priority = params[:priority_id].blank? ? nil : Enumeration.find_by_id(params[:priority_id])
+      priority = params[:priority_id].blank? ? nil : IssuePriority.find_by_id(params[:priority_id])
       assigned_to = (params[:assigned_to_id].blank? || params[:assigned_to_id] == 'none') ? nil : User.find_by_id(params[:assigned_to_id])
       category = (params[:category_id].blank? || params[:category_id] == 'none') ? nil : @project.issue_categories.find_by_id(params[:category_id])
       fixed_version = (params[:fixed_version_id].blank? || params[:fixed_version_id] == 'none') ? nil : @project.versions.find_by_id(params[:fixed_version_id])
@@ -257,7 +257,7 @@ class IssuesController < ApplicationController
         issue.custom_field_values = custom_field_values if custom_field_values && !custom_field_values.empty?
         call_hook(:controller_issues_bulk_edit_before_save, { :params => params, :issue => issue })
         # Don't save any change to the issue if the user is not authorized to apply the requested status
-        unless (status.nil? || (issue.status.new_status_allowed_to?(status, current_role, issue.tracker) && issue.status = status)) && issue.save
+        unless (status.nil? || (issue.new_statuses_allowed_to(User.current).include?(status) && issue.status = status)) && issue.save
           # Keep unsaved issue ids to display them in flash error
           unsaved_issue_ids << issue.id
         end
@@ -274,7 +274,7 @@ class IssuesController < ApplicationController
     end
     # Find potential statuses the user could be allowed to switch issues to
     @available_statuses = Workflow.find(:all, :include => :new_status,
-                                              :conditions => {:role_id => current_role.id}).collect(&:new_status).compact.uniq.sort
+                                              :conditions => {:role_id => User.current.roles_for_project(@project).collect(&:id)}).collect(&:new_status).compact.uniq.sort
     @custom_fields = @project.issue_custom_fields.select {|f| f.field_format == 'list'}
   end
 
@@ -285,7 +285,7 @@ class IssuesController < ApplicationController
       # admin is allowed to move issues to any active (visible) project
       @allowed_projects = Project.find(:all, :conditions => Project.visible_by(User.current))
     else
-      User.current.memberships.each {|m| @allowed_projects << m.project if m.role.allowed_to?(:move_issues)}
+      User.current.memberships.each {|m| @allowed_projects << m.project if m.roles.detect {|r| r.allowed_to?(:move_issues)}}
     end
     @target_project = @allowed_projects.detect {|p| p.id.to_s == params[:new_project_id]} if params[:new_project_id]
     @target_project ||= @project    
@@ -416,7 +416,7 @@ class IssuesController < ApplicationController
       @assignables << @issue.assigned_to if @issue && @issue.assigned_to && !@assignables.include?(@issue.assigned_to)
     end
     
-    @priorities = Enumeration.priorities.reverse
+    @priorities = IssuePriority.all.reverse
     @statuses = IssueStatus.find(:all, :order => 'position')
     @back = request.env['HTTP_REFERER']
     

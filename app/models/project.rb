@@ -61,7 +61,8 @@ class Project < ActiveRecord::Base
   validates_length_of :name, :maximum => 30
   validates_length_of :homepage, :maximum => 255
   validates_length_of :identifier, :in => 1..20
-  validates_format_of :identifier, :with => /^[a-z0-9\-]*$/
+  # donwcase letters, digits, dashes but not digits only
+  validates_format_of :identifier, :with => /^(?!\d+$)[a-z0-9\-]*$/, :if => Proc.new { |p| p.identifier_changed? }
   
   before_destroy :delete_all_members
 
@@ -135,7 +136,7 @@ class Project < ActiveRecord::Base
       statements << "1=0"
       if user.logged?
         statements << "#{Project.table_name}.is_public = #{connection.quoted_true}" if Role.non_member.allowed_to?(permission)
-        allowed_project_ids = user.memberships.select {|m| m.role.allowed_to?(permission)}.collect {|m| m.project_id}
+        allowed_project_ids = user.memberships.select {|m| m.roles.detect {|role| role.allowed_to?(permission)}}.collect {|m| m.project_id}
         statements << "#{Project.table_name}.id IN (#{allowed_project_ids.join(',')})" if allowed_project_ids.any?
       elsif Role.anonymous.allowed_to?(permission)
         # anonymous user allowed on public project
@@ -245,14 +246,27 @@ class Project < ActiveRecord::Base
                          :order => "#{Tracker.table_name}.position")
   end
   
+  # Returns a hash of project users grouped by role
+  def users_by_role
+    members.find(:all, :include => [:user, :roles]).inject({}) do |h, m|
+      m.roles.each do |r|
+        h[r] ||= []
+        h[r] << m.user
+      end
+      h
+    end
+  end
+  
   # Deletes all project's members
   def delete_all_members
+    me, mr = Member.table_name, MemberRole.table_name
+    connection.delete("DELETE FROM #{mr} WHERE #{mr}.member_id IN (SELECT #{me}.id FROM #{me} WHERE #{me}.project_id = #{id})")
     Member.delete_all(['project_id = ?', id])
   end
   
   # Users issues can be assigned to
   def assignable_users
-    members.select {|m| m.role.assignable?}.collect {|m| m.user}.sort
+    members.select {|m| m.roles.detect {|role| role.assignable?}}.collect {|m| m.user}.sort
   end
   
   # Returns the mail adresses of users that should be always notified on project events
@@ -318,9 +332,65 @@ class Project < ActiveRecord::Base
     p.nil? ? nil : p.identifier.to_s.succ
   end
 
-protected
-  def validate
-    errors.add(:identifier, :invalid) if !identifier.blank? && identifier.match(/^\d*$/)
+  # Copies and saves the Project instance based on the +project+.
+  # Will duplicate the source project's:
+  # * Issues
+  # * Members
+  # * Queries
+  def copy(project)
+    project = project.is_a?(Project) ? project : Project.find(project)
+
+    Project.transaction do
+      # Issues
+      project.issues.each do |issue|
+        new_issue = Issue.new
+        new_issue.copy_from(issue)
+        self.issues << new_issue
+      end
+    
+      # Members
+      project.members.each do |member|
+        new_member = Member.new
+        new_member.attributes = member.attributes.dup.except("project_id")
+        new_member.role_ids = member.role_ids.dup
+        new_member.project = self
+        self.members << new_member
+      end
+      
+      # Queries
+      project.queries.each do |query|
+        new_query = Query.new
+        new_query.attributes = query.attributes.dup.except("project_id", "sort_criteria")
+        new_query.sort_criteria = query.sort_criteria if query.sort_criteria
+        new_query.project = self
+        self.queries << new_query
+      end
+
+      Redmine::Hook.call_hook(:model_project_copy_before_save, :source_project => project, :destination_project => self)
+      self.save
+    end
+  end
+
+  
+  # Copies +project+ and returns the new instance.  This will not save
+  # the copy
+  def self.copy_from(project)
+    begin
+      project = project.is_a?(Project) ? project : Project.find(project)
+      if project
+        # clear unique attributes
+        attributes = project.attributes.dup.except('name', 'identifier', 'id', 'status')
+        copy = Project.new(attributes)
+        copy.enabled_modules = project.enabled_modules
+        copy.trackers = project.trackers
+        copy.custom_values = project.custom_values.collect {|v| v.clone}
+        return copy
+      else
+        return nil
+      end
+    rescue ActiveRecord::RecordNotFound
+      return nil
+    end
   end
   
 private

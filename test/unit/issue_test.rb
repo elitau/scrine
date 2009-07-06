@@ -18,23 +18,23 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class IssueTest < Test::Unit::TestCase
-  fixtures :projects, :users, :members,
+  fixtures :projects, :users, :members, :member_roles,
            :trackers, :projects_trackers,
-           :issue_statuses, :issue_categories,
+           :issue_statuses, :issue_categories, :issue_relations, :workflows, 
            :enumerations,
            :issues,
            :custom_fields, :custom_fields_projects, :custom_fields_trackers, :custom_values,
            :time_entries
 
   def test_create
-    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'test_create', :description => 'IssueTest#test_create', :estimated_hours => '1:30')
+    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'test_create', :description => 'IssueTest#test_create', :estimated_hours => '1:30')
     assert issue.save
     issue.reload
     assert_equal 1.5, issue.estimated_hours
   end
   
   def test_create_minimal
-    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'test_create')
+    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'test_create')
     assert issue.save
     assert issue.description.nil?
   end
@@ -123,7 +123,7 @@ class IssueTest < Test::Unit::TestCase
   end
   
   def test_category_based_assignment
-    issue = Issue.create(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'Assignment test', :description => 'Assignment test', :category_id => 1)
+    issue = Issue.create(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'Assignment test', :description => 'Assignment test', :category_id => 1)
     assert_equal IssueCategory.find(1).assigned_to, issue.assigned_to
   end
   
@@ -139,7 +139,7 @@ class IssueTest < Test::Unit::TestCase
   
   def test_should_close_duplicates
     # Create 3 issues
-    issue1 = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 1, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'Duplicates test', :description => 'Duplicates test')
+    issue1 = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 1, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'Duplicates test', :description => 'Duplicates test')
     assert issue1.save
     issue2 = issue1.clone
     assert issue2.save
@@ -166,7 +166,7 @@ class IssueTest < Test::Unit::TestCase
   
   def test_should_not_close_duplicated_issue
     # Create 3 issues
-    issue1 = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 1, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'Duplicates test', :description => 'Duplicates test')
+    issue1 = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 1, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'Duplicates test', :description => 'Duplicates test')
     assert issue1.save
     issue2 = issue1.clone
     assert issue2.save
@@ -234,6 +234,32 @@ class IssueTest < Test::Unit::TestCase
     assert_nil TimeEntry.find_by_issue_id(1)
   end
   
+  def test_blocked
+    blocked_issue = Issue.find(9)
+    blocking_issue = Issue.find(10)
+     
+    assert blocked_issue.blocked?
+    assert !blocking_issue.blocked?
+  end
+  
+  def test_blocked_issues_dont_allow_closed_statuses
+    blocked_issue = Issue.find(9)
+  
+    allowed_statuses = blocked_issue.new_statuses_allowed_to(users(:users_002))
+    assert !allowed_statuses.empty?
+    closed_statuses = allowed_statuses.select {|st| st.is_closed?}
+    assert closed_statuses.empty?
+  end
+  
+  def test_unblocked_issues_allow_closed_statuses
+    blocking_issue = Issue.find(10)
+  
+    allowed_statuses = blocking_issue.new_statuses_allowed_to(users(:users_002))
+    assert !allowed_statuses.empty?
+    closed_statuses = allowed_statuses.select {|st| st.is_closed?}
+    assert !closed_statuses.empty?
+  end
+  
   def test_overdue
     assert Issue.new(:due_date => 1.day.ago.to_date).overdue?
     assert !Issue.new(:due_date => Date.today).overdue?
@@ -242,9 +268,13 @@ class IssueTest < Test::Unit::TestCase
     assert !Issue.new(:due_date => 1.day.ago.to_date, :status => IssueStatus.find(:first, :conditions => {:is_closed => true})).overdue?
   end
   
+  def test_assignable_users
+    assert_kind_of User, Issue.find(1).assignable_users.first
+  end
+  
   def test_create_should_send_email_notification
     ActionMailer::Base.deliveries.clear
-    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => Enumeration.priorities.first, :subject => 'test_create', :estimated_hours => '1:30')
+    issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'test_create', :estimated_hours => '1:30')
 
     assert issue.save
     assert_equal 1, ActionMailer::Base.deliveries.size

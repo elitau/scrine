@@ -23,10 +23,11 @@ class ProjectsController < ApplicationController
   menu_item :settings, :only => :settings
   menu_item :issues, :only => [:changelog]
   
-  before_filter :find_project, :except => [ :index, :list, :add, :activity ]
+  before_filter :find_project, :except => [ :index, :list, :add, :copy, :activity ]
   before_filter :find_optional_project, :only => :activity
-  before_filter :authorize, :except => [ :index, :list, :add, :archive, :unarchive, :destroy, :activity ]
-  before_filter :require_admin, :only => [ :add, :archive, :unarchive, :destroy ]
+  before_filter :authorize, :except => [ :index, :list, :add, :copy, :archive, :unarchive, :destroy, :activity ]
+  before_filter :authorize_global, :only => :add
+  before_filter :require_admin, :only => [ :copy, :archive, :unarchive, :destroy ]
   accept_key_auth :activity
   
   after_filter :only => [:add, :edit, :archive, :unarchive, :destroy] do |controller|
@@ -75,11 +76,41 @@ class ProjectsController < ApplicationController
       @project.enabled_module_names = params[:enabled_modules]
       if @project.save
         @project.set_parent!(params[:project]['parent_id']) if User.current.admin? && params[:project].has_key?('parent_id')
+        # Add current user as a project member if he is not admin
+        unless User.current.admin?
+          r = Role.givable.find_by_id(Setting.new_project_user_role_id.to_i) || Role.givable.first
+          m = Member.new(:user => User.current, :roles => [r])
+          @project.members << m
+        end
         flash[:notice] = l(:notice_successful_create)
-        redirect_to :controller => 'admin', :action => 'projects'
-	  end		
+        redirect_to :controller => 'projects', :action => 'settings', :id => @project
+      end
     end	
   end
+  
+  def copy
+    @issue_custom_fields = IssueCustomField.find(:all, :order => "#{CustomField.table_name}.position")
+    @trackers = Tracker.all
+    @root_projects = Project.find(:all,
+                                  :conditions => "parent_id IS NULL AND status = #{Project::STATUS_ACTIVE}",
+                                  :order => 'name')
+    if request.get?
+      @project = Project.copy_from(params[:id])
+      if @project
+        @project.identifier = Project.next_identifier if Setting.sequential_project_identifiers?
+      else
+        redirect_to :controller => 'admin', :action => 'projects'
+      end  
+    else
+      @project = Project.new(params[:project])
+      @project.enabled_module_names = params[:enabled_modules]
+      if @project.copy(params[:id])
+        flash[:notice] = l(:notice_successful_create)
+        redirect_to :controller => 'admin', :action => 'projects'
+      end		
+    end	
+  end
+
 	
   # Show @project
   def show
@@ -88,7 +119,7 @@ class ProjectsController < ApplicationController
       redirect_to_project_menu_item(@project, params[:jump]) && return
     end
     
-    @members_by_role = @project.members.find(:all, :include => [:user, :role], :order => 'position').group_by {|m| m.role}
+    @users_by_role = @project.users_by_role
     @subprojects = @project.children.visible
     @news = @project.news.find(:all, :limit => 5, :include => [ :author, :project ], :order => "#{News.table_name}.created_on DESC")
     @trackers = @project.rolled_up_trackers
@@ -141,12 +172,12 @@ class ProjectsController < ApplicationController
 
   def archive
     @project.archive if request.post? && @project.active?
-    redirect_to :controller => 'admin', :action => 'projects'
+    redirect_to(url_for(:controller => 'admin', :action => 'projects', :status => params[:status]))
   end
   
   def unarchive
     @project.unarchive if request.post? && !@project.active?
-    redirect_to :controller => 'admin', :action => 'projects'
+    redirect_to(url_for(:controller => 'admin', :action => 'projects', :status => params[:status]))
   end
   
   # Delete @project

@@ -38,27 +38,26 @@ class ApplicationController < ActionController::Base
     require_dependency "repository/#{scm.underscore}"
   end
   
-  def current_role
-    @current_role ||= User.current.role_for_project(@project)
-  end
-  
   def user_setup
     # Check the settings cache for each request
     Setting.check_cache
     # Find the current user
-    self.logged_user = find_current_user
+    User.current = find_current_user
   end
   
   # Returns the current user or nil if no user is logged in
+  # and starts a session if needed
   def find_current_user
     if session[:user_id]
       # existing session
       (User.active.find(session[:user_id]) rescue nil)
     elsif cookies[:autologin] && Setting.autologin?
-      # auto-login feature
-      User.try_to_autologin(cookies[:autologin])
-    elsif params[:key] && accept_key_auth_actions.include?(params[:action])
-      # RSS key authentication
+      # auto-login feature starts a new session
+      user = User.try_to_autologin(cookies[:autologin])
+      session[:user_id] = user.id if user
+      user
+    elsif params[:format] == 'atom' && params[:key] && accept_key_auth_actions.include?(params[:action])
+      # RSS key authentication does not start a session
       User.find_by_rss_key(params[:key])
     end
   end
@@ -118,9 +117,14 @@ class ApplicationController < ActionController::Base
   end
 
   # Authorize the user for the requested action
-  def authorize(ctrl = params[:controller], action = params[:action])
-    allowed = User.current.allowed_to?({:controller => ctrl, :action => action}, @project)
+  def authorize(ctrl = params[:controller], action = params[:action], global = false)
+    allowed = User.current.allowed_to?({:controller => ctrl, :action => action}, @project, :global => global)
     allowed ? true : deny_access
+  end
+
+  # Authorize the user for the requested action outside a project
+  def authorize_global(ctrl = params[:controller], action = params[:action], global = true)
+    authorize(ctrl, action, global)
   end
   
   # make sure that the user is a member of the project (or admin) if project is private

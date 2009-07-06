@@ -642,7 +642,7 @@ gl:
   notice_default_data_loaded: Configuración por defecto cargada correctamente.
   notice_email_error: "Ocorreu un error enviando o correo ({{value}})"
   notice_email_sent: "Enviouse un correo a {{value}}"
-  notice_failed_to_save_issues: "Imposible gravar %s petición(s) en {{count}} seleccionado: {{value}}."
+  notice_failed_to_save_issues: "Imposible gravar %s petición(s) en {{count}} seleccionado: {{ids}}."
   notice_feeds_access_key_reseted: A súa clave de acceso para RSS reiniciouse.
   notice_file_not_found: A páxina á que tenta acceder non existe.
   notice_locking_conflict: Os datos modificáronse por outro usuario.
@@ -822,3 +822,11 @@ gl:
   text_wiki_page_destroy_children: Delete child pages and all their descendants
   setting_password_min_length: Minimum password length
   field_group_by: Group results by
+  mail_subject_wiki_content_updated: "'{{page}}' wiki page has been updated"
+  label_wiki_content_added: Wiki page added
+  mail_subject_wiki_content_added: "'{{page}}' wiki page has been added"
+  mail_body_wiki_content_added: The '{{page}}' wiki page has been added by {{author}}.
+  label_wiki_content_updated: Wiki page updated
+  mail_body_wiki_content_updated: The '{{page}}' wiki page has been updated by {{author}}.
+  permission_add_project: Create project
+  setting_new_project_user_role_id: Role given to a non-admin user who creates a project
