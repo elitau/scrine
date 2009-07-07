@@ -1,0 +1,8 @@
+<span id="time_estimation_<%= session[:estimation_number] %>">
+  <%= select_tag "issue[role_ids][]", options_for_select(@roles.collect {|r| [r.name, r.id]}) %>
+  <%= text_field_tag "issue[estimated_hours][]", nil, :id => "issue_estimated_hours", :size => "3" %> <%= l(:field_hours) %>
+  <%= link_to_remote(image_tag("add.png"),
+      :url => { :action => "add_time_estimation"  }) %>
+  <%= link_to_remote(image_tag("false.png"), :update => "emails",
+      :url => { :action => "remove_time_estimation" }) unless session[:estimation_number] == 1 %>
+</span>
