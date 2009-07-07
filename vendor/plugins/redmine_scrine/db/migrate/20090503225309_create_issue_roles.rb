@@ -3,7 +3,7 @@ class CreateIssueRoles < ActiveRecord::Migration
     create_table :issue_roles do |t|
       t.column :issue_id, :integer
       t.column :role_id, :integer
-      t.integer :estimated_hours
+      t.float :estimated_hours
     end
   end
 

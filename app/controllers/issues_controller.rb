@@ -17,11 +17,11 @@
 
 class IssuesController < ApplicationController
   menu_item :new_issue, :only => :new
-  # before_filter :load_roles # scrine stuff
+  before_filter :load_roles # scrine stuff
   before_filter :find_issue, :only => [:show, :edit, :reply]
   before_filter :find_issues, :only => [:bulk_edit, :move, :destroy]
   before_filter :find_project, :only => [:new, :update_form, :preview]
-  before_filter :authorize, :except => [:index, :changes, :gantt, :calendar, :preview, :update_form, :context_menu]
+  before_filter :authorize, :except => [:index, :changes, :gantt, :calendar, :preview, :update_form, :context_menu, :add_time_estimation, :remove_time_estimation]
   before_filter :find_optional_project, :only => [:index, :changes, :gantt, :calendar]
   accept_key_auth :index, :show, :changes
 
@@ -42,7 +42,25 @@ class IssuesController < ApplicationController
   include IssuesHelper
   helper :timelog
   include Redmine::Export::PDF
-
+  
+  # scrine stuff
+  def add_time_estimation
+    session[:estimation_number]+=1
+    render :update do |page|
+      page.insert_html :bottom, "add_time_estimation", :partial => "add_time_estimation"
+    end
+  end
+  
+  def remove_time_estimation
+    render :update do |page|
+      page.remove "time_estimation_#{session[:estimation_number]}"
+    end
+    session[:estimation_number]-=1
+  end
+  
+  
+  
+  # scrine stuff end
 
   def index
     retrieve_query
@@ -127,6 +145,9 @@ class IssuesController < ApplicationController
   # The new issue will be created from an existing one if copy_from parameter is given
   def new
     @issue = Issue.new
+    # scrine stuff
+    session[:estimation_number] = 1
+    # scrine stuff end
     @issue.copy_from(params[:copy_from]) if params[:copy_from]
     @issue.project = @project
     # Tracker must be set before custom field values
@@ -157,6 +178,10 @@ class IssuesController < ApplicationController
       @issue.status = (@allowed_statuses.include? requested_status) ? requested_status : default_status
       if @issue.save
         attach_files(@issue, params[:attachments])
+        logger.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:IssuesController")
+        logger.debug("estimated_hours: #{params[:issue][:estimated_hours]}, role_ids: #{params[:issue][:role_ids]}")
+        
+        @issue.estimated_hours_with_roles(params[:issue][:estimated_hours], params[:issue][:role_ids])
         flash[:notice] = l(:notice_successful_create)
         call_hook(:controller_issues_new_after_save, { :params => params, :issue => @issue})
         redirect_to(params[:continue] ? { :action => 'new', :tracker_id => @issue.tracker } :
@@ -503,5 +528,10 @@ private
         @query.project = @project
       end
     end
+  end
+
+  # scrine stuff
+  def load_roles
+    @roles = Role.all
   end
 end

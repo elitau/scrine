@@ -41,9 +41,17 @@
 </tr>
 <tr>
     <td class="fixed-version"><b><%=l(:field_fixed_version)%>:</b></td><td><%= @issue.fixed_version ? link_to_version(@issue.fixed_version) : "-" %></td>
-    <% if @issue.estimated_hours %>
-    <td class="estimated-hours"><b><%=l(:field_estimated_hours)%>:</b></td><td><%= l_hours(@issue.estimated_hours) %></td>
-    <% end %>
+    <!-- scrine stuff start -->
+    <td class="estimated-hours"><b><%=l(:field_estimated_hours)%>:</b></td>
+    <td>
+      <table width="100%">
+        <%- @issue.issue_roles.each do |issue_role| -%>
+          <tr><td><%= issue_role.role.name %>: <%= l_hours(issue_role.estimated_hours) %></td></tr>
+        <%- end -%>
+        <tr><td><b>Gesamt:</b> <%= l_hours(@issue.estimated_hours) %></td></tr>
+      </table>
+    </td>
+    <!-- scrine stuff end -->
 </tr>
 <tr>
 <% n = 0 -%>

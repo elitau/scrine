@@ -6,6 +6,7 @@ class BurndownsController < ApplicationController
 
   def show
     @chart = BurndownChart.new(@version)
+    # @capacity_chart = CapacityChart.new(@version)
   end
 
 private

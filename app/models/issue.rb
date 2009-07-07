@@ -57,6 +57,39 @@ class Issue < ActiveRecord::Base
   named_scope :open, :conditions => ["#{IssueStatus.table_name}.is_closed = ?", false], :include => :status
   
   after_save :create_journal
+
+  # scrine stuff
+  has_many :issue_roles
+  has_many :roles, :through => :issue_roles
+  
+  def estimated_hours
+    issue_roles.sum(:estimated_hours)
+    # self[:estimated_hours]
+  end
+  
+  def estimated_hours_with_roles(hours, role_ids)
+    all_hours = 0
+    role_ids.each_with_index do |role_id, i|
+      issue_role = issue_roles.find(:first, :conditions => {:role_id => role_id.to_i})
+      issue_role.estimated_hours = hours[i].to_hours
+      all_hours+=issue_role.estimated_hours
+      issue_role.save
+    end
+    # estimated_hours=(all_hours)
+  end
+  
+  
+  def estimated_hours=(h)
+    case h
+    when String
+      time = h.to_hours
+    when Array
+    else
+      write_attribute :estimated_hours, h
+    end
+  end
+  # end scrine stuff
+  
   
   # Returns true if usr or current user is allowed to view the issue
   def visible?(usr=nil)
@@ -125,10 +158,6 @@ class Issue < ActiveRecord::Base
   def priority_id=(pid)
     self.priority = nil
     write_attribute(:priority_id, pid)
-  end
-  
-  def estimated_hours=(h)
-    write_attribute :estimated_hours, (h.is_a?(String) ? h.to_hours : h)
   end
   
   def validate

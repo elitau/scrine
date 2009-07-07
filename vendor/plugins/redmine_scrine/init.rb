@@ -1,6 +1,6 @@
 require 'redmine'
-require_dependency 'issues_controller_patch'
-require_dependency 'issue_patch'
+# require_dependency 'issues_controller_patch'
+# require_dependency 'issue_patch'
 # require File.expand_path("#{File.dirname(__FILE__)}/lib/issue_controller_patch")
 
 Redmine::Plugin.register :redmine_scrine do
