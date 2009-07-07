@@ -19,6 +19,14 @@ class Role < ActiveRecord::Base
   # Built-in roles
   BUILTIN_NON_MEMBER = 1
   BUILTIN_ANONYMOUS  = 2
+  
+  # scrine stuff
+  has_many :issue_roles
+  has_many :issues, :through => :issue_roles
+  
+  def estimated_hours
+    issue_roles.sum(:estimated_hours)
+  end
 
   named_scope :givable, { :conditions => "builtin = 0", :order => 'position' }
   named_scope :builtin, lambda { |*args|

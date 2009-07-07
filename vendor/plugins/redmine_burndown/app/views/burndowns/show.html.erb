@@ -2,7 +2,8 @@
 
 <p><%= image_tag(@chart.to_s) %></p>
 
-<p><%# image_tag(@capacity_chart.to_s) %></p>
+<h2><%= @version.name %> Kapazit&auml;t</h2>
+<p><%= image_tag(@capacity_chart.to_s) %></p>
 
 <% content_for :sidebar do -%>
   <h3><%= l(:label_version_plural) %></h3>
